@@ -1,25 +1,53 @@
+import { useState, ChangeEvent, FormEvent, Dispatch } from "react"
+import { Activity } from "../types"
 import { categories } from "../data/categories"
-import { useState } from "react"
+import { ActivityActions } from "../reducers/activity-reducer"
 
-export default function Form() {
 
-  const [activity, setActivity] = useState({
+
+
+type FormProps = {
+  dispatch: Dispatch<ActivityActions>
+}
+
+export default function Form({dispatch}:FormProps) {
+
+  const [activity, setActivity] = useState<Activity>({
     category: '',
     name: '',
     calories: 0
   })
+  
 
-  const handleChange = (e) =>{
+
+  const handleChange = (e:ChangeEvent<HTMLSelectElement> | ChangeEvent<HTMLInputElement>) =>{
+    const isNumberField = ['category', 'calories'].includes(e.target.id)// metodo que verifica si el id del elemento es igual al de category o calories que son los campos con types numericos
+
     setActivity({
       ...activity,
-      [e.target.id]: e.target.value
+      [e.target.id]: isNumberField? +e.target.value : e.target.value
     })
     
   }
 
+  const isValidActivity =() =>{
+    const {name, calories} = activity
+    //validar que la actividad no este vacia y que las calorias sean mayores a 0
+    return name.trim()!== '' && calories > 0;
+    
+
+  }
+  const handleSubmit = (e:FormEvent<HTMLFormElement>) =>{
+
+    dispatch({type: 'save-activity', payload: {newActivity: activity}})
+  }
+
 
   return (
-    <form className=" space-y-5 bg-white shadow p-10 rounded-lg">
+    <form 
+    className=" space-y-5 bg-white shadow p-10 rounded-lg"
+    onSubmit={handleSubmit}
+    >
         <div className=" grid grid-cols-1 gap-3">
             <label htmlFor="category" className="font-bold">Catogoria:</label>
 
@@ -70,8 +98,9 @@ export default function Form() {
 
         <input 
         type="submit"
-        className="bg-gray-800 hover: bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer"
-        value={"Guardar comida o Guardar ejercicio"}
+        className="bg-gray-800 hover: bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer disabled:opacity-10"
+        value={activity.calories === 1 ?'Guardar Comida' : 'Guardar ejercicio'}
+        disabled={!isValidActivity()}
 
         />
         
