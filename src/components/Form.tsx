@@ -1,7 +1,8 @@
 import { useState, ChangeEvent, FormEvent, Dispatch } from "react"
+import {v4 as uuidv4} from 'uuid'
 import { Activity } from "../types"
 import { categories } from "../data/categories"
-import { ActivityActions } from "../reducers/activity-reducer"
+import { ActivityActions } from '../reducers/activity-reducer';
 
 
 
@@ -10,13 +11,16 @@ type FormProps = {
   dispatch: Dispatch<ActivityActions>
 }
 
+    const initialState: Activity = {
+      id: uuidv4(),
+      category: 1,
+      name: '',
+      calories: 0
+    }
+
 export default function Form({dispatch}:FormProps) {
 
-  const [activity, setActivity] = useState<Activity>({
-    category: '',
-    name: '',
-    calories: 0
-  })
+  const [activity, setActivity] = useState<Activity>(initialState)
   
 
 
@@ -38,8 +42,14 @@ export default function Form({dispatch}:FormProps) {
 
   }
   const handleSubmit = (e:FormEvent<HTMLFormElement>) =>{
+    e.preventDefault()
 
     dispatch({type: 'save-activity', payload: {newActivity: activity}})
+
+    setActivity({
+      ...initialState,
+      id: uuidv4()// genera un nuevo id para la actividad
+    })// reiniciar el state de la actividad al inicial 
   }
 
 
@@ -98,7 +108,7 @@ export default function Form({dispatch}:FormProps) {
 
         <input 
         type="submit"
-        className="bg-gray-800 hover: bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer disabled:opacity-10"
+        className="bg-gray-800 hover:bg-gray-900 w-full p-2 font-bold uppercase text-white cursor-pointer disabled:opacity-10"
         value={activity.calories === 1 ?'Guardar Comida' : 'Guardar ejercicio'}
         disabled={!isValidActivity()}
 
